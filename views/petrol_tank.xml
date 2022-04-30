@@ -1,0 +1,127 @@
+<odoo>
+    <data>
+        <record id="tank_view_kanban" model="ir.ui.view">
+         <field name="name">tank.view.kanban</field>
+          <field name="model">petrol.tank</field>
+            <field name="arch" type="xml">
+                <kanban default_group_by="stage_id">
+                    <progressbar field="balance_progress" colors="{&quot;normal&quot;: &quot;muted&quot;, &quot;done&quot;: &quot;success&quot;, &quot;blocked&quot;: &quot;danger&quot;}"/>
+                    <field name="name"/>
+                    <templates>
+                        <t t-name="kanban-box">
+                          <div class="o_kanban_record oe_kanban_global_click o_kanban_record_has_image_fill">
+                            <div class="o_kanban_record_details">
+                              <div class="o_kanban_record_top" name="studio_auto_kanban_top">
+                                <div class="o_kanban_record_headings" name="studio_auto_kanban_headings">
+<!--                                  <field name="x_studio_priority" widget="boolean_favorite" nolabel="1"/>-->
+                                  <strong class="o_kanban_record_title" name="studio_auto_kanban_title">
+                                    <field name="name" widget="badge"/>
+                                    <field name="last_charge" display="full"/>
+                                    <field name="capacity" display="full"/>
+                                    <field name="balance_progress" display="full" widget="percentpie"/>
+                                  </strong>
+                                </div>
+                                <div class="o_dropdown_kanban dropdown">
+                                  <a role="button" class="dropdown-toggle o-no-caret btn" data-toggle="dropdown" data-display="static" href="#" aria-label="Dropdown Menu" title="Dropdown Menu">
+                                    <span class="fa fa-ellipsis-v"/>
+                                  </a>
+                                  <div class="dropdown-menu" role="menu">
+                                    <a t-if="widget.editable" role="menuitem" type="edit" class="dropdown-item">Edit</a>
+                                    <a t-if="widget.deletable" role="menuitem" type="delete" class="dropdown-item">Delete</a>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </t>
+                      </templates>
+                </kanban>
+            </field>
+        </record>
+        <record id="tank_view_tree" model="ir.ui.view">
+            <field name="name">tank.view.tree</field>
+            <field name="model">petrol.tank</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name"/>
+                    <field name="last_charge"/>
+                    <field name="capacity"/>
+                    <field name="used"/>
+                    <field name="charged"/>
+                    <field name="balance"/>
+                    <field name="balance_progress" widget="progressbar"/>
+                </tree>
+            </field>
+        </record>
+        <record id="tank_view_form" model="ir.ui.view">
+            <field name="name">tank.view.form</field>
+            <field name="model">petrol.tank</field>
+            <field name="arch" type="xml">
+                <form>
+                    <header>
+                        <field name="stage_id" widget="statusbar" clickable="1"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="name" required="1" placeholder="Name..."/>
+                            </h1>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="capacity"/>
+                                <field name="used"/>
+                                <field name="charged"/>
+                                <field name="balance"/>
+                                <field name="balance_progress" widget="progressbar"/>
+                            </group>
+                            <group>
+                                <field name="last_charge"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Charges">
+                                <field name="charge_ids">
+                                    <tree editable="bottom">
+                                        <field name="name"/>
+                                        <field name="charge_date"/>
+                                        <field name="quantity"/>
+                                        <field name="cost"/>
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="Uses">
+                                <field name="use_ids">
+                                    <tree editable="bottom">
+                                        <field name="name"/>
+                                        <field name="vehicle_id"/>
+                                        <field name="odometer"/>
+                                        <field name="current_quantity"/>
+                                        <field name="quantity"/>
+                                        <field name="datetime"/>
+                                        <field name="last_odometer"/>
+                                        <field name="last_quantity"/>
+                                        <field name="liter_per_km_rate"/>
+                                    </tree>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <div class="oe_chatter" name="oe_chatter">
+                        <field name="message_follower_ids"/>
+                        <field name="message_ids"/>
+                        <field name="activity_ids"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+        <record id="tank_action" model="ir.actions.act_window">
+            <field name="name">Tanks</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">petrol.tank</field>
+            <field name="view_mode">kanban,tree,form</field>
+        </record>
+        <menuitem id="petrol_root" name="Petrol" sequence="10" web_icon="fa fa-flask,#262c34,#58a177"/>
+        <menuitem id="tank_menu" name="Tanks" parent="petrol_root" sequence="1" action="tank_action"/>
+    </data>
+</odoo>

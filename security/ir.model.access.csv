@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_petrol_tank_stage,petrol.tank.stage,model_petrol_tank_stage,,1,1,1,1
+access_petrol_tank,petrol.tank,model_petrol_tank,,1,1,1,1
+access_petrol_tank_charge,petrol.tank.charge,model_petrol_tank_charge,,1,1,1,1
+access_petrol_tank_use,petrol.tank.use,model_petrol_tank_use,,1,1,1,1

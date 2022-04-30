@@ -1,0 +1,58 @@
+<odoo>
+    <data>
+        <record id="tank_use_view_tree" model="ir.ui.view">
+            <field name="name">tank.use.view.tree</field>
+            <field name="model">petrol.tank.use</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name"/>
+                    <field name="vehicle_id"/>
+                    <field name="odometer"/>
+                    <field name="current_quantity"/>
+                    <field name="quantity"/>
+                    <field name="datetime"/>
+                    <field name="last_odometer"/>
+                    <field name="last_quantity"/>
+                    <field name="liter_per_km_rate"/>
+                </tree>
+            </field>
+        </record>
+        <record id="tank_use_view_form" model="ir.ui.view">
+            <field name="name">tank.use.view.form</field>
+            <field name="model">petrol.tank.use</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="name" required="1" placeholder="Name..."/>
+                            </h1>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="vehicle_id"/>
+                                <field name="odometer"/>
+                                <field name="current_quantity"/>
+                                <field name="quantity"/>
+                                <field name="datetime"/>
+                            </group>
+                            <group>
+                                <field name="tank_id"/>
+                                <field name="last_odometer"/>
+                                <field name="last_quantity"/>
+                                <field name="liter_per_km_rate"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record id="tank_use_action" model="ir.actions.act_window">
+            <field name="name">Uses</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">petrol.tank.use</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        <menuitem id="tank_use_menu" name="Uses" parent="care_petrol.petrol_root" sequence="2" action="tank_use_action"/>
+    </data>
+</odoo>

@@ -1,0 +1,21 @@
+<odoo>
+    <data>
+        <record id="tank_stage_view_tree" model="ir.ui.view">
+            <field name="name">tank.stage.view.tree</field>
+            <field name="model">petrol.tank.stage</field>
+            <field name="arch" type="xml">
+                <tree editable="bottom">
+                    <field name="name"/>
+                </tree>
+            </field>
+        </record>
+        <record id="tank_stage_action" model="ir.actions.act_window">
+            <field name="name">Tank Stages</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">petrol.tank.stage</field>
+            <field name="view_mode">tree</field>
+        </record>
+        <menuitem id="petrol_config_menu" name="Configurations" parent="care_petrol.petrol_root" sequence="3"/>
+        <menuitem id="tank_stage_menu" name="Tank Stages" parent="care_petrol.petrol_config_menu" sequence="1" action="tank_stage_action"/>
+    </data>
+</odoo>
