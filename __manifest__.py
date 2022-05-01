@@ -28,6 +28,7 @@
         'views/tank_stage.xml',
         'views/tank_use.xml',
         'views/tank_charge.xml',
+        'views/odometer.xml',
     ],
 }
 # -*- coding: utf-8 -*-

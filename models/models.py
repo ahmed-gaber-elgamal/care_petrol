@@ -37,7 +37,7 @@ class PetrolTank(models.Model):
     def compute_charged(self):
         for rec in self:
             rec.charged = 0
-            if rec.use_ids:
+            if rec.charge_ids:
                 rec.charged = sum([rec.quantity for rec in rec.charge_ids])
 
     @api.depends('capacity', 'used', 'charged')
@@ -82,27 +82,57 @@ class TankUse(models.Model):
     tank_id = fields.Many2one('petrol.tank', string="Source of Record")
     vehicle_id = fields.Many2one('fleet.vehicle')
     odometer = fields.Many2one('fleet.vehicle.odometer')
+    odometer_value = fields.Float()
     current_quantity = fields.Float()
     quantity = fields.Float()
+    use_quantity = fields.Float(compute='compute_use_quantity', store=True)
     datetime = fields.Datetime(string="Date & Time")
-    last_odometer = fields.Float()
-    last_quantity = fields.Float(compute='compute_last_quantity', store=True)
+    last_odometer = fields.Float(compute='compute_last_odometer', store=True)
+    last_quantity = fields.Float(compute='compute_last_odometer', store=True)
     liter_per_km_rate = fields.Float(compute='compute_liter_per_km_rate', store=True)
 
-    @api.depends('odometer', 'last_odometer', 'quantity', 'last_quantity')
+    @api.depends('current_quantity', 'quantity')
+    def compute_use_quantity(self):
+        for rec in self:
+            rec.use_quantity = rec.quantity + rec.current_quantity
+
+    @api.depends('vehicle_id')
+    def compute_last_odometer(self):
+        for rec in self:
+            if rec.vehicle_id:
+                last_odometers = self.env['fleet.vehicle.odometer'].search([
+                    ('vehicle_id', '=', rec.vehicle_id.id), ('use_id', '!=', False),
+                    ('create_date', '<', rec.create_date),
+                ])
+                if last_odometers:
+                    last_odometers.mapped('date')
+                    rec.last_odometer = last_odometers[-1].value
+                    rec.last_quantity = last_odometers[-1].use_id.use_quantity
+
+    @api.depends('odometer_value', 'last_odometer', 'current_quantity', 'last_quantity')
     def compute_liter_per_km_rate(self):
         for rec in self:
-            if rec.odometer and rec.last_odometer and rec.quantity and rec.last_quantity:
+            if rec.odometer_value and rec.last_odometer and rec.current_quantity and rec.last_quantity:
                 if rec.last_quantity - rec.quantity != 0:
-                    rec.liter_per_km_rate = round((rec.last_odometer - rec.odometer.value) / (rec.last_quantity - rec.quantity), 2)
+                    rec.liter_per_km_rate = round((rec.odometer_value - rec.last_odometer) / (rec.last_quantity - rec.current_quantity), 2)
                 else:
                     rec.liter_per_km_rate = 0
 
-    @api.depends('tank_id.use_ids')
-    def compute_last_quantity(self):
-        for rec in self:
-            rec.last_quantity = 0
-            dates = [use.datetime for use in rec.tank_id.use_ids if use.datetime]
-            if dates:
-                last_date = rec.tank_id.use_ids.filtered(lambda u: u.datetime == max(dates))
-                rec.last_quantity = last_date.quantity
+    @api.model
+    def create(self, vals):
+        res = super(TankUse, self).create(vals)
+        if vals.get('vehicle_id', False) and vals.get('datetime', False) and vals.get('odometer_value', False):
+            new_odometer = self.env['fleet.vehicle.odometer'].create({
+                'vehicle_id': res.vehicle_id.id,
+                'date': res.datetime,
+                'use_id': res.id,
+                'value': res.odometer_value,
+            })
+            res.odometer = new_odometer.id
+        return res
+
+
+class Odometer(models.Model):
+    _inherit = 'fleet.vehicle.odometer'
+
+    use_id = fields.Many2one('petrol.tank.use')

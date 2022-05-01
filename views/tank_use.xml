@@ -30,11 +30,13 @@
                         </div>
                         <group>
                             <group>
-                                <field name="vehicle_id"/>
-                                <field name="odometer"/>
+                                <field name="vehicle_id" required="1"/>
+                                <field name="odometer_value" required="1"/>
+                                <field name="odometer" readonly="1"/>
                                 <field name="current_quantity"/>
                                 <field name="quantity"/>
-                                <field name="datetime"/>
+                                <field name="use_quantity" invisible="1"/>
+                                <field name="datetime" required="1"/>
                             </group>
                             <group>
                                 <field name="tank_id"/>
