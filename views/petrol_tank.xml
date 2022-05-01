@@ -94,11 +94,12 @@
                                 <field name="use_ids">
                                     <tree editable="bottom">
                                         <field name="name"/>
-                                        <field name="vehicle_id"/>
-                                        <field name="odometer"/>
+                                        <field name="vehicle_id" required="1"/>
+                                        <field name="odometer_value" required="1"/>
+                                        <field name="odometer" readonly="1"/>
                                         <field name="current_quantity"/>
                                         <field name="quantity"/>
-                                        <field name="datetime"/>
+                                        <field name="datetime" required="1"/>
                                         <field name="last_odometer"/>
                                         <field name="last_quantity"/>
                                         <field name="liter_per_km_rate"/>
