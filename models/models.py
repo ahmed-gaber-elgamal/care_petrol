@@ -27,12 +27,12 @@ class PetrolTank(models.Model):
     use_ids = fields.One2many('petrol.tank.use', 'tank_id')
     first_charge_balance = fields.Float(compute='compute_first_charge_balance', store=True)
 
-    @api.depends('capacity', 'used', 'charge_ids.quantity')
+    @api.depends('used', 'charge_ids.quantity')
     def compute_first_charge_balance(self):
         for rec in self:
-            if rec.capacity and rec.used and rec.charge_ids:
+            if rec.used and rec.charge_ids:
                 first_charge = sum([rec.quantity for rec in rec.charge_ids[0]])
-                rec.first_charge_balance = rec.capacity + rec.used - first_charge
+                rec.first_charge_balance = rec.used - first_charge
             else:
                 rec.first_charge_balance = 0
 
@@ -50,14 +50,14 @@ class PetrolTank(models.Model):
             if rec.charge_ids:
                 rec.charged = sum([rec.quantity for rec in rec.charge_ids])
 
-    @api.depends('capacity', 'used', 'charged')
+    @api.depends('used', 'charged')
     def compute_balance(self):
         for rec in self:
-            rec.balance = rec.charged + rec.capacity - rec.used
-            if rec.capacity:
-                rec.balance_progress = rec.balance * 100 / rec.capacity
+            rec.balance = rec.charged - rec.used
+            if rec.charged and rec.used:
+                rec.balance_progress = rec.balance * 100 / rec.charged
             else:
-                rec.balance_progress = 0
+                rec.balance_progress = 100
 
     @api.depends('charge_ids.charge_date')
     def compute_last_charge(self):
@@ -139,9 +139,11 @@ class TankUse(models.Model):
                 last_odometers = self.env['fleet.vehicle.odometer'].search([
                     ('vehicle_id', '=', rec.vehicle_id.id), ('use_id', '!=', False),
                     ('create_date', '<', rec.create_date),
-                ])
+                ], order='id')
                 if last_odometers:
+                    print("last_odometers>>", last_odometers)
                     last_odometers.mapped('date')
+                    print(last_odometers.mapped('date'))
                     rec.last_odometer = last_odometers[-1].value
                     rec.last_quantity = last_odometers[-1].use_id.use_quantity
 

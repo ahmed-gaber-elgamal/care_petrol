@@ -32,7 +32,7 @@
                             <group>
                                 <field name="vehicle_id" required="1"/>
                                 <field name="odometer_value" required="1"/>
-                                <field name="odometer" invisible="1"/>
+                                <field name="odometer" invisible="0"/>
                                 <field name="current_quantity"/>
                                 <field name="quantity"/>
                                 <field name="use_quantity" invisible="1"/>
