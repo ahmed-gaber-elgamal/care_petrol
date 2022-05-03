@@ -122,8 +122,8 @@ class TankUse(models.Model):
     @api.depends('current_quantity', 'last_quantity')
     def compute_used_quantity(self):
         for rec in self:
-            if (rec.current_quantity and rec.last_quantity) and (rec.current_quantity > rec.last_quantity):
-                rec.used_quantity = rec.current_quantity - rec.last_quantity
+            if (rec.current_quantity and rec.last_quantity) and (rec.current_quantity < rec.last_quantity):
+                rec.used_quantity = rec.last_quantity - rec.current_quantity
             else:
                 rec.used_quantity = 0
 
