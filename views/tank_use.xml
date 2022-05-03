@@ -32,7 +32,7 @@
                             <group>
                                 <field name="vehicle_id" required="1"/>
                                 <field name="odometer_value" required="1"/>
-                                <field name="odometer" readonly="1"/>
+                                <field name="odometer" invisible="1"/>
                                 <field name="current_quantity"/>
                                 <field name="quantity"/>
                                 <field name="use_quantity" invisible="1"/>
@@ -43,6 +43,14 @@
                                 <field name="last_odometer"/>
                                 <field name="last_quantity"/>
                                 <field name="liter_per_km_rate"/>
+                            </group>
+                        </group>
+                        <group>
+                            <group>
+                                <field name="used_odometer"/>
+                            </group>
+                            <group>
+                                <field name="used_quantity"/>
                             </group>
                         </group>
                     </sheet>

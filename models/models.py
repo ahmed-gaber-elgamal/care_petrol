@@ -25,6 +25,16 @@ class PetrolTank(models.Model):
     stage_id = fields.Many2one('petrol.tank.stage')
     charge_ids = fields.One2many('petrol.tank.charge', 'tank_id')
     use_ids = fields.One2many('petrol.tank.use', 'tank_id')
+    first_charge_balance = fields.Float(compute='compute_first_charge_balance', store=True)
+
+    @api.depends('capacity', 'used', 'charge_ids.quantity')
+    def compute_first_charge_balance(self):
+        for rec in self:
+            if rec.capacity and rec.used and rec.charge_ids:
+                first_charge = sum([rec.quantity for rec in rec.charge_ids[0]])
+                rec.first_charge_balance = rec.capacity + rec.used - first_charge
+            else:
+                rec.first_charge_balance = 0
 
     @api.depends('use_ids.quantity')
     def compute_used(self):
@@ -82,7 +92,7 @@ class TankUse(models.Model):
     tank_id = fields.Many2one('petrol.tank', string="Source of Record")
     vehicle_id = fields.Many2one('fleet.vehicle')
     odometer = fields.Many2one('fleet.vehicle.odometer')
-    odometer_value = fields.Float()
+    odometer_value = fields.Float(string="Current Odometer")
     current_quantity = fields.Float()
     quantity = fields.Float()
     use_quantity = fields.Float(compute='compute_use_quantity', store=True)
@@ -90,6 +100,18 @@ class TankUse(models.Model):
     last_odometer = fields.Float(compute='compute_last_odometer', store=True)
     last_quantity = fields.Float(compute='compute_last_odometer', store=True)
     liter_per_km_rate = fields.Float(compute='compute_liter_per_km_rate', store=True)
+    used_odometer = fields.Float(compute='compute_used_odometer', store=True)
+    used_quantity = fields.Float(compute='compute_used_quantity', store=True)
+
+    @api.depends('odometer_value', 'last_odometer')
+    def compute_used_odometer(self):
+        for rec in self:
+            rec.used_odometer = rec.odometer_value - rec.last_odometer
+
+    @api.depends('current_quantity', 'last_quantity')
+    def compute_used_quantity(self):
+        for rec in self:
+            rec.used_quantity = rec.current_quantity - rec.last_quantity
 
     @api.depends('current_quantity', 'quantity')
     def compute_use_quantity(self):
@@ -130,6 +152,13 @@ class TankUse(models.Model):
             })
             res.odometer = new_odometer.id
         return res
+
+    def name_get(self):
+        result = []
+        for use in self:
+            name = use.vehicle_id.name + ' ' + str(use.id)
+            result.append((use.id, name))
+        return result
 
 
 class Odometer(models.Model):
