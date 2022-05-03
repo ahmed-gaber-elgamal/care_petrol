@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="seq_tank_use" model="ir.sequence">
+            <field name="name">Tank Use</field>
+            <field name="code">petrol.tank.use</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_tank_charge" model="ir.sequence">
+            <field name="name">Tank Charge</field>
+            <field name="code">petrol.tank.charge</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+    </data>
+</odoo>

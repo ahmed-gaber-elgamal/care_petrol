@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from odoo import models, fields, api
+from odoo import models, fields, api, _
 
 
 class TankStage(models.Model):
@@ -77,18 +77,29 @@ class TankCharge(models.Model):
     _name = 'petrol.tank.charge'
     _description = 'Petrol Tank Charge'
 
-    name = fields.Char(required=True)
+    name = fields.Char(required=True, copy=False, readonly=True, index=True, default=lambda self: _('New'))
     tank_id = fields.Many2one('petrol.tank')
     charge_date = fields.Date()
     quantity = fields.Float()
     cost = fields.Float()
+
+    @api.model
+    def create(self, vals):
+        if vals.get('name', _('New')) == _('New'):
+            tank = self.env['petrol.tank'].browse(vals.get('tank_id'))
+            if tank:
+                vals['name'] = tank.name + ' ' + self.env['ir.sequence'].next_by_code('petrol.tank.charge') or _('New')
+            else:
+                vals['name'] = self.env['ir.sequence'].next_by_code('petrol.tank.charge') or _('New')
+        res = super(TankCharge, self).create(vals)
+        return res
 
 
 class TankUse(models.Model):
     _name = 'petrol.tank.use'
     _description = 'Petrol Tank Use'
 
-    name = fields.Char(required=True)
+    name = fields.Char(required=True, copy=False, readonly=True, index=True, default=lambda self: _('New'))
     tank_id = fields.Many2one('petrol.tank', string="Source of Record")
     vehicle_id = fields.Many2one('fleet.vehicle')
     odometer = fields.Many2one('fleet.vehicle.odometer')
@@ -111,7 +122,10 @@ class TankUse(models.Model):
     @api.depends('current_quantity', 'last_quantity')
     def compute_used_quantity(self):
         for rec in self:
-            rec.used_quantity = rec.current_quantity - rec.last_quantity
+            if (rec.current_quantity and rec.last_quantity) and (rec.current_quantity > rec.last_quantity):
+                rec.used_quantity = rec.current_quantity - rec.last_quantity
+            else:
+                rec.used_quantity = 0
 
     @api.depends('current_quantity', 'quantity')
     def compute_use_quantity(self):
@@ -142,6 +156,9 @@ class TankUse(models.Model):
 
     @api.model
     def create(self, vals):
+        if vals.get('name', _('New')) == _('New'):
+            vehicle = self.env['fleet.vehicle'].browse(vals.get('vehicle_id'))
+            vals['name'] = vehicle.name + ' ' + self.env['ir.sequence'].next_by_code('petrol.tank.use') or _('New')
         res = super(TankUse, self).create(vals)
         if vals.get('vehicle_id', False) and vals.get('datetime', False) and vals.get('odometer_value', False):
             new_odometer = self.env['fleet.vehicle.odometer'].create({
@@ -152,13 +169,6 @@ class TankUse(models.Model):
             })
             res.odometer = new_odometer.id
         return res
-
-    def name_get(self):
-        result = []
-        for use in self:
-            name = use.vehicle_id.name + ' ' + str(use.id)
-            result.append((use.id, name))
-        return result
 
 
 class Odometer(models.Model):
